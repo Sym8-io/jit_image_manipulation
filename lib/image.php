@@ -270,16 +270,19 @@ if ($last_modified) {
 // Allow CORS
 // respond to preflights
 if (isset($settings['image']['allow_origin']) && $settings['image']['allow_origin'] !== null) {
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         // return only the headers and not the content
         // only allow CORS if we're doing a GET - i.e. no sending for now.
-        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']) && $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] == 'GET') {
-            header('Access-Control-Allow-Origin: *');
+        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']) && $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] === 'GET') {
+            header('Access-Control-Allow-Origin: ' . $settings['image']['allow_origin']);
             header('Access-Control-Allow-Headers: X-Requested-With');
+            header('Access-Control-Allow-Methods: GET');
         }
         exit;
     } else {
-        header('Origin: ' . $settings['image']['allow_origin']);
+        // Do NOT set the Origin header; it is set by the Client (user agent).
+        // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin
+        // header('Origin: ' . $settings['image']['allow_origin']);
         header('Access-Control-Allow-Origin: ' . $settings['image']['allow_origin']);
         header('Access-Control-Allow-Methods: GET');
         header('Access-Control-Max-Age: 3000');
