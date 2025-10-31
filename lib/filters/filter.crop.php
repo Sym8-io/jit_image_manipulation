@@ -21,16 +21,14 @@ Class FilterCrop extends ImageFilter
         $dst_w = Image::width($res);
         $dst_h = Image::height($res);
 
-        if(!empty($width) && !empty($height)) {
+        if (!empty($width) && !empty($height)) {
             $dst_w = $width;
             $dst_h = $height;
-        }
-        else if(empty($height)) {
+        } elseif (empty($height)) {
             $ratio = ($dst_h / $dst_w);
             $dst_w = $width;
             $dst_h = round($dst_w * $ratio);
-        }
-        else if(empty($width)) {
+        } elseif (empty($width)) {
             $ratio = ($dst_w / $dst_h);
             $dst_h = $height;
             $dst_w = round($dst_h * $ratio);
@@ -47,7 +45,7 @@ Class FilterCrop extends ImageFilter
 
         imagecopyresampled($tmp, $res, $src_x, $src_y, $dst_x, $dst_y, $image_width, $image_height, $image_width, $image_height);
 
-        if($res instanceof GdImage) {
+        if ($res instanceof GdImage) {
             imagedestroy($res);
         }
 
@@ -60,15 +58,13 @@ Class FilterCrop extends ImageFilter
         $dst_x = $dst_y = 0;
         $src_x = $src_y = 0;
 
-        if($width < $src_w){
+        if ($width < $src_w) {
             $mx = array(
                 0,
                 ceil(($src_w * 0.5) - ($width * 0.5)),
                 $src_x = $src_w - $width
             );
-        }
-
-        else{
+        } else {
             $mx = array(
                 0,
                 ceil(($width * 0.5) - ($src_w * 0.5)),
@@ -76,15 +72,13 @@ Class FilterCrop extends ImageFilter
             );
         }
 
-        if($height < $src_h){
+        if ($height < $src_h) {
             $my = array(
                 0,
                 ceil(($src_h * 0.5) - ($height * 0.5)),
                 $src_y = $src_h - $height
             );
-        }
-
-        else{
+        } else {
             $my = array(
                 0,
                 ceil(($height * 0.5) - ($src_h * 0.5)),
@@ -92,42 +86,33 @@ Class FilterCrop extends ImageFilter
             );
         }
 
-        switch($position){
-
+        switch ($position) {
             case 1:
                 break;
-
             case 2:
                 $src_x = 1;
                 break;
-
             case 3:
                 $src_x = 2;
                 break;
-
             case 4:
                 $src_y = 1;
                 break;
-
             case 5:
                 $src_x = 1;
                 $src_y = 1;
                 break;
-
             case 6:
                 $src_x = 2;
                 $src_y = 1;
                 break;
-
             case 7:
                 $src_y = 2;
                 break;
-
             case 8:
                 $src_x = 1;
                 $src_y = 2;
                 break;
-
             case 9:
                 $src_x = 2;
                 $src_y = 2;
