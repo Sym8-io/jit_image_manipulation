@@ -1,3 +1,5 @@
+![Static Badge](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=php&logoColor=green&label=PHP%208)
+
 # JIT Image Manipulation
 
 A simple way to manipulate images "just in time" via the URL. Supports caching, image quality settings and loading of offsite images.
@@ -18,8 +20,8 @@ Since version `1.15`, JIT configuration has moved from `/manifest/` to the `/wor
 
 Due to some `.htaccess` changes in Symphony 2.0.6+, it is recommended that you edit your core Symphony `.htaccess` to remove anything before 'extensions/' in the JIT rewrite. It should look like the following regardless of where you installed Symphony:
 
-	### IMAGE RULES
-	RewriteRule ^image\/(.+\.(jpg|gif|jpeg|png|bmp))$ extensions/jit_image_manipulation/lib/image.php?param=$1 [L,NC]
+    ### IMAGE RULES
+    RewriteRule ^image\/(.+\.(jpg|gif|jpeg|png|bmp))$ extensions/jit_image_manipulation/lib/image.php?param=$1 [L,NC]
 
 It is not absolutely necessary to do this, but may prevent problems with future releases.
 
@@ -29,7 +31,7 @@ It is not absolutely necessary to do this, but may prevent problems with future 
 
 The image manipulation is controlled via the URL, eg.:
 
-	<img src="{$root}/image/2/80/80/5/fff{image/@path}/{image/filename}" />
+    <img src="{$root}/image/2/80/80/5/fff{image/@path}/{image/filename}" />
 
 The extension accepts four numeric settings and one text setting for the manipulation.
 
@@ -49,24 +51,24 @@ There are four possible modes:
 
 If you're using mode `2` or `3` for image cropping you need to specify the reference position:
 
-	+---+---+---+
-	| 1 | 2 | 3 |
-	+---+---+---+
-	| 4 | 5 | 6 |
-	+---+---+---+
-	| 7 | 8 | 9 |
-	+---+---+---+
+    +---+---+---+
+    | 1 | 2 | 3 |
+    +---+---+---+
+    | 4 | 5 | 6 |
+    +---+---+---+
+    | 7 | 8 | 9 |
+    +---+---+---+
 
 If you're using mode `2` or `3` for image cropping, there is an optional fifth parameter for background color. This can accept shorthand or full hex colors.
 
-- *For `.jpg` images, it is advised to use this if the crop size is larger than the original, otherwise the extra canvas will be black.*
-- *For transparent `.png` or `.gif` images, supplying the background color will fill the image. This is why the setting is optional*
+- _For `.jpg` images, it is advised to use this if the crop size is larger than the original, otherwise the extra canvas will be black._
+- _For transparent `.png` or `.gif` images, supplying the background color will fill the image. This is why the setting is optional_
 
 The extra fifth parameter makes the URL look like this:
 
-	<img src="{$root}/image/2/80/80/5/fff{image/@path}/{image/filename}" />
+    <img src="{$root}/image/2/80/80/5/fff{image/@path}/{image/filename}" />
 
-- *If you wish to crop and maintain the aspect ratio of an image but only have one fixed dimension (that is, width or height), simply set the other dimension to 0*
+- _If you wish to crop and maintain the aspect ratio of an image but only have one fixed dimension (that is, width or height), simply set the other dimension to 0_
 
 ### External sources & Trusted Sites
 
@@ -74,14 +76,14 @@ In order pull images from external sources, you must set up a white-list of trus
 
 The URL then requires a sixth parameter, external, (where the fourth and fifth parameter may be optional), which is simply `1` or `0`. By default, this parameter is `0`, which means the image is located on the same domain as JIT. Setting it to `1` will allow JIT to process external images provided they are on the Trusted Sites list.
 
-	<img src="{$root}/image/1/80/80/1/{full/path/to/image}" />
-	                                ^ External parameter
+    <img src="{$root}/image/1/80/80/1/{full/path/to/image}" />
+                                    ^ External parameter
 
 ### Recipes
 
 Recipes are named rules for the JIT settings which help improve security and are more convenient. They can be edited on the preferences page in the JIT section and are saved in  `/workspace/jit-image-manipulation/recipes.php`. A recipe URL might look like:
 
-	<img src="{$root}/image/thumbnail{image/@path}/{image/filename}" />
+    <img src="{$root}/image/thumbnail{image/@path}/{image/filename}" />
 
 When JIT parses a URL like this, it will check the recipes file for a recipe with a handle of `thumbnail` and apply it's rules. You can completely disable dynamic JIT rules and choose to use recipes only which will prevent a malicious user from hammering your server with large or multiple JIT requests.
 
