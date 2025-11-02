@@ -2,6 +2,22 @@
 
 require_once(TOOLKIT . '/class.gateway.php');
 
+/**
+ * Define missing IMAGETYPE_* constants for backward compatibility.
+ * Prevents "Undefined constant" error in load() and output() methods.
+ * Values according to official assignment (from ext/standard/image.c):
+ * - IMAGETYPE_BMP = 6 (added in PHP 7.2)
+ * - IMAGETYPE_AVIF = 19 (added in PHP 8.1)
+ */
+
+if (!defined('IMAGETYPE_BMP')) {
+    define('IMAGETYPE_BMP', 6);
+}
+
+if (!defined('IMAGETYPE_AVIF')) {
+    define('IMAGETYPE_AVIF', 19);
+}
+
 Class Image
 {
     private $_resource;
@@ -127,8 +143,27 @@ Class Image
             case IMAGETYPE_WEBP:
                 $resource = imagecreatefromwebp($image);
                 break;
+            // BMP
+            // available from PHP >= 7.2.0
+            case IMAGETYPE_BMP:
+                if (function_exists('imagecreatefrombmp')) {
+                    $resource = imagecreatefrombmp($image);
+                } else {
+                    throw new Exception(__('BMP not supported by this PHP build (missing GD BMP support)'));
+                }
+                break;
+            // AVIF
+            // available from PHP >= 8.1.0
+            // and GD was compiled with libavif support
+            case IMAGETYPE_AVIF:
+                if (function_exists('imagecreatefromavif')) {
+                    $resource = imagecreatefromavif($image);
+                } else {
+                    throw new Exception(__('AVIF not supported by this PHP build (missing GD AVIF support)'));
+                }
+                break;
             default:
-                throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
+                throw new Exception(__('Unsupported image type. Supported types: GIF, JPEG, PNG and WebP'));
                 break;
         }
 
@@ -462,6 +497,15 @@ Class Image
                 break;
             case IMAGETYPE_WEBP:
                 return imagewebp($this->_resource, $dest, $quality);
+                break;
+            case IMAGETYPE_BMP:
+                // imagebmp() expects a value for compression in the third position instead of quality.
+                // Use boolean for PHP >= 8.0, integer for older versions.
+                $compressed = (PHP_VERSION_ID >= 80000) ? true : 1;
+                return imagebmp($this->_resource, $dest, $compressed);
+                break;
+            case IMAGETYPE_AVIF:
+                return imageavif($this->_resource, $dest, $quality);
                 break;
             case IMAGETYPE_JPEG:
             default:
