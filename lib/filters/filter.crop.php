@@ -45,7 +45,9 @@ Class FilterCrop extends ImageFilter
 
         imagecopyresampled($tmp, $res, $src_x, $src_y, $dst_x, $dst_y, $image_width, $image_height, $image_width, $image_height);
 
-        if ($res instanceof GdImage) {
+        if (class_exists('GdImage') && $res instanceof GdImage) {
+            unset($res);
+        } elseif (is_resource($res)) {
             imagedestroy($res);
         }
 

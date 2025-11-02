@@ -30,7 +30,9 @@ Class FilterResize extends ImageFilter
 
         imagecopyresampled($dst, $res, 0, 0, 0, 0, $dst_w, $dst_h, Image::width($res), Image::height($res));
 
-        if ($res instanceof GdImage) {
+        if (class_exists('GdImage') && $res instanceof GdImage) {
+            unset($res);
+        } elseif (is_resource($res)) {
             imagedestroy($res);
         }
 

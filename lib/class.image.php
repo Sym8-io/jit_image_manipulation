@@ -21,7 +21,9 @@ Class Image
 
     public function __destruct()
     {
-        if ($this->_resource instanceof GdImage) {
+        if (class_exists('GdImage') && $this->_resource instanceof GdImage) {
+            unset($this->_resource);
+        } elseif (is_resource($this->_resource)) {
             imagedestroy($this->_resource);
         }
     }
@@ -109,7 +111,6 @@ Class Image
                 // GD 2.0.22 supports basic CMYK to RGB conversion.
                 // RE: https://github.com/symphonycms/jit_image_manipulation/issues/47
                 $gdSupportsCMYK = version_compare(GD_VERSION, '2.0.22', '>=');
-
                 // Can't handle CMYK JPEG files
                 if ($meta->channels > 3 && $gdSupportsCMYK === false) {
                     throw new Exception('Cannot load CMYK JPG images');
@@ -131,8 +132,16 @@ Class Image
                 break;
         }
 
-        if (!$resource instanceof GdImage) {
-            throw new Exception(sprintf('Error creating image <code>%s</code>. Check it exists and is readable.', str_replace(DOCROOT, '', $image)));
+        if (class_exists('GdImage')) {
+            // PHP >= 8.0: GDImage object expected
+            if (!$resource instanceof GdImage) {
+                throw new Exception(sprintf('Error creating image <code>%s</code>. Check it exists and is readable.', str_replace(DOCROOT, '', $image)));
+            }
+        } else {
+            // PHP < 8 resource expected
+            if (!is_resource($resource)) {
+                throw new Exception(sprintf('Error creating image <code>%s</code>. Check it exists and is readable.', str_replace(DOCROOT, '', $image)));
+            }
         }
 
         $obj = new self($resource, $meta);
@@ -379,7 +388,7 @@ Class Image
 
         self::renderOutputHeaders($output);
 
-        if (isset($this->_image) && $this->_image instanceof GdImage) {
+        if (isset($this->_image) && ((class_exists('GdImage') && $this->_image instanceof GdImage) || is_resource($this->_image))) {
             return $this->_image;
         } else {
             return self::__render(NULL, $quality, $interlacing, $output);
@@ -427,8 +436,16 @@ Class Image
      */
     private function __render($dest, $quality = Image::DEFAULT_QUALITY, $interlacing = Image::DEFAULT_INTERLACE, $output = null)
     {
-        if (!$this->_resource instanceof GdImage) {
-            throw new Exception('Invalid image resource supplied');
+        if (class_exists('GdImage')) {
+            // PHP >= 8: GDImage objekt expected
+            if (!$this->_resource instanceof GdImage) {
+                throw new Exception('Invalid image resource supplied');
+            }
+        } else {
+            // PHP < 8 resource expected
+            if (!is_resource($this->_resource)) {
+                throw new Exception('Invalid image resource supplied');
+            }
         }
 
         // Turn interlacing on for JPEG or PNG only
