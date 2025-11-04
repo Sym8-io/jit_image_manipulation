@@ -493,7 +493,9 @@ Class Image
                 return imagegif($this->_resource, $dest);
                 break;
             case IMAGETYPE_PNG:
-                return imagepng($this->_resource, $dest, round(9 * ($quality * 0.01)));
+                // PNG compression is lossless.
+                // Fixed to 9 (highest compression) for smallest file size.
+                return imagepng($this->_resource, $dest, 9);
                 break;
             case IMAGETYPE_WEBP:
                 return imagewebp($this->_resource, $dest, $quality);
