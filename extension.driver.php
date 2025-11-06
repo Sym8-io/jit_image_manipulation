@@ -22,6 +22,11 @@ Class extension_JIT_Image_Manipulation extends Extension
                 'page' => '/system/preferences/',
                 'delegate' => 'Save',
                 'callback' => '__SavePreferences'
+            ),
+            array(
+                'page' => '/backend/',
+                'delegate' => 'AppendPageAlert',
+                'callback' => 'globalCacheWarning'
             )
         );
     }
@@ -137,6 +142,25 @@ Class extension_JIT_Image_Manipulation extends Extension
     /*-------------------------------------------------------------------------
      *        Utilities:
      *-------------------------------------------------------------------------*/
+
+    public function globalCacheWarning()
+    {
+        if (Symphony::Configuration()->get('cache', 'image') === '0') {
+            if (Symphony::Author()->isDeveloper()) {
+                Administration::instance()->Page->pageAlert(
+                    __('The cache for images is disabled. For better performance, enable it in the %s.', [
+                        '<a href="' . SYMPHONY_URL . '/system/preferences/">' . __('JIT preferences') . '</a>'
+                    ]),
+                    Alert::ERROR
+                );
+            } else {
+                Administration::instance()->Page->pageAlert(
+                    __('The cache for images is disabled. For better performance, ask your developer to enable it.'),
+                    Alert::ERROR
+                );
+            }
+        }
+    }
 
     public function indent($depth = 1)
     {
@@ -549,6 +573,36 @@ Class extension_JIT_Image_Manipulation extends Extension
         $div->appendChild($duplicator);
         $group->appendChild($div);
 
+        // checkbox to disable chache
+        $label = Widget::Label();
+        $input = Widget::Input('settings[image][cache]', '1', 'checkbox');
+        if (Symphony::Configuration()->get('cache', 'image') === '1') {
+            $input->setAttribute('checked', 'checked');
+        }
+        $label->setValue($input->generate() . ' ' . __('Enable cache for images (recommend)'));
+        $span = new XMLElement('span', __('When disabled, images are regenerated each time they are called up (slower, but helpful for debugging or development).'), array('class' => 'help'));
+        $label->appendChild($span);
+        $group->appendChild($label);
+
+        // text input for image quality
+        $attributes = array(
+            'min' => '0',
+            'max' => '100',
+            'step' => '1',
+            'required' => 'required',
+        );
+        $label = Widget::Label(__('Image quality '));
+        $input = Widget::Input('settings[image][quality]', General::sanitize(Symphony::Configuration()->get('quality', 'image')), 'number', $attributes);
+        if (isset($context['errors']['quality'])) {
+            $input->setAttribute('value', '90');
+        }
+        $label->appendChild($input);
+        if (isset($context['errors']['quality'])) {
+            $group->appendChild(Widget::Error($label, $context['errors']['quality']));
+        } else {
+            $group->appendChild($label);
+        }
+
         // checkbox to disable regular rules
         $label = Widget::Label();
         $input = Widget::Input('settings[image][disable_regular_rules]', 'yes', 'checkbox');
@@ -595,6 +649,27 @@ Class extension_JIT_Image_Manipulation extends Extension
     public function __SavePreferences($context)
     {
         $recipes_saved = self::__OK__;
+
+        if (!isset($context['settings']['image']['cache'])) {
+            $context['settings']['image']['cache'] = '0';
+        }
+
+        if (isset($context['settings']['image']['quality'])) {
+            $quality = trim($context['settings']['image']['quality']);
+            if ($quality === '') {
+                $context['errors']['quality'] = __('%s is a required field.', array('Quality'));
+            } else {
+                if (is_numeric($quality) === false) {
+                    $context['errors']['quality'] = __('Value must be a number.');
+                } else {
+                    if ((int)$quality > 100) {
+                        $context['errors']['quality'] = __('Value must be less than or equal to %s.', array('100'));
+                    } elseif ((int)$quality < 0) {
+                        $context['errors']['quality'] = __('Value must be greater than or equal to %s.', array('0'));
+                    }
+                }
+            }
+        }
 
         if (!isset($context['settings']['image']['disable_regular_rules'])) {
             $context['settings']['image']['disable_regular_rules'] = 'no';
