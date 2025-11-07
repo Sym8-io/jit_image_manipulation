@@ -15,6 +15,15 @@
         </author>
     </authors>
     <releases>
+        <release version="1.50.0" date="2025-11-07" min="2.6.0" max="2.x.x">
+            - Restore PHP 7 compatibiliy for GD image handling
+            - Add BMP and AVIF image support
+            - Fix PNG image quality handling
+            - Improved recipes form UI and validation
+            - Image quality and cache in the JIT preferences
+            - Update language pack
+            - Update documentation
+        </release>
         <release version="1.49.1" date="2025-10-31" min="2.6.0" max="2.x.x">
             - PSR-12 formatting
             - Fixed undefined array key "position"
